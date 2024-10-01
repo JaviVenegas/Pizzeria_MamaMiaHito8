@@ -7,12 +7,13 @@ export const UserContext = createContext();
         const [user, setUser] = useState(null);
         const [token, setToken] = useState(null);
         const navigate = useNavigate();
-// Revisa si hay un token en localStorage al cargar la aplicación
+        
+//Get user for profile jsx 
 useEffect(() => {
     const savedToken = localStorage.getItem("token");
     if (savedToken) {
       setToken(savedToken);
-      getUser(savedToken);  // Obtiene los datos del usuario si hay un token
+      getUser(savedToken); 
     }
   }, []);
 
@@ -81,7 +82,7 @@ useEffect(() => {
             alert("Authentication successful!");
             localStorage.setItem("token", data.token);
             setToken(data.token);
-            await getUser(); // Fetch user data after setting token
+            await getUser(); 
             navigate("/");
         } catch (error) {
             alert(error.message);
