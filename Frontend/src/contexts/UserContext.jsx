@@ -3,38 +3,39 @@ import { useNavigate } from 'react-router-dom';
 
 export const UserContext = createContext();
 
-export const UserProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
-    const navigate = useNavigate();
+    export const UserProvider = ({ children }) => {
+        const [user, setUser] = useState(null);
+        const [token, setToken] = useState(null);
+        const navigate = useNavigate();
+// Revisa si hay un token en localStorage al cargar la aplicación
+useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    if (savedToken) {
+      setToken(savedToken);
+      getUser(savedToken);  // Obtiene los datos del usuario si hay un token
+    }
+  }, []);
 
-    // Function to fetch user data
-    const getUser = async () => {
-        if (!token) return;
-        try {
-            const response = await fetch("http://localhost:5000/api/auth/me", {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error("Error fetching user data");
-            setUser(data);
-        } catch (error) {
-            alert(error.message);
-        }
-    };
+    const logOut = () => {
+    localStorage.removeItem("token");
+    setToken(null);
+    setUser(null);
+    navigate("/login");
+  };
 
-    // Fetch token from localStorage and get user data
-    useEffect(() => {
-        const storedToken = localStorage.getItem("token");
-        if (storedToken) {
-            setToken(storedToken);
-            getUser();
-        }
-    }, []);
-
+  const getUser = async () => {
+    if (token) {
+      const response = await fetch("http://localhost:5000/api/auth/me", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setUser(data);
+    }
+  };
+   
     // Register 
     const register = async (email, password) => {
         try {
@@ -87,16 +88,10 @@ export const UserProvider = ({ children }) => {
         }
     };
 
-    // Logout user
-    const logOut = () => {
-        localStorage.removeItem("token");
-        setToken(null);
-        setUser(null);
-        navigate("/login");
-    };
+    
 
     return (
-        <UserContext.Provider value={{ user, token, logOut, login, register }}>
+        <UserContext.Provider value={{ user, token, logOut, login, register, getUser }}>
             {children}
         </UserContext.Provider>
     );
